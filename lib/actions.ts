@@ -63,6 +63,26 @@ export async function createSaasApp(formData: FormData): Promise<CreateSaasResul
   return { ok: true, slug: saas.slug, apiKey: secret };
 }
 
+export interface DeleteSaasResult {
+  ok: boolean;
+  error?: string;
+}
+
+export async function deleteSaasApp(slug: string): Promise<DeleteSaasResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: 'Non authentifié.' };
+
+  const { error, count } = await supabase.from('saas_apps').delete({ count: 'exact' }).eq('slug', slug);
+  if (error) return { ok: false, error: error.message };
+  if (!count) return { ok: false, error: 'SaaS introuvable.' };
+
+  revalidatePath('/');
+  return { ok: true };
+}
+
 export interface ManualSnapshotResult {
   ok: boolean;
   error?: string;

@@ -5,6 +5,7 @@ import { parsePeriod } from '@/lib/period';
 import { TopBar } from '@/components/TopBar';
 import { DetailView } from '@/components/DetailView';
 import { ManualSnapshotForm } from '@/components/ManualSnapshotForm';
+import { DeleteSaasButton } from '@/components/DeleteSaasButton';
 
 export const revalidate = 0;
 
@@ -37,6 +38,9 @@ export default async function SaasDetailPage({ params, searchParams }: PageProps
           </p>
         )}
         <ManualSnapshotForm slug={saas.slug} />
+        <div style={{ marginTop: 8, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
+          <DeleteSaasButton slug={saas.slug} name={saas.name} />
+        </div>
       </div>
     </>
   );
