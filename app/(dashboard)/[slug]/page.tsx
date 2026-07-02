@@ -4,6 +4,7 @@ import { buildDetail } from '@/lib/metrics';
 import { parsePeriod } from '@/lib/period';
 import { TopBar } from '@/components/TopBar';
 import { DetailView } from '@/components/DetailView';
+import { ManualSnapshotForm } from '@/components/ManualSnapshotForm';
 
 export const revalidate = 0;
 
@@ -27,7 +28,7 @@ export default async function SaasDetailPage({ params, searchParams }: PageProps
   return (
     <>
       <TopBar title={saas.name} subtitle={saas.category ?? ''} showBack />
-      <div className="content">
+      <div className="content" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         {detail ? (
           <DetailView saas={saas} detail={detail} />
         ) : (
@@ -35,6 +36,7 @@ export default async function SaasDetailPage({ params, searchParams }: PageProps
             Aucune métrique reçue pour {saas.name} pour le moment.
           </p>
         )}
+        <ManualSnapshotForm slug={saas.slug} />
       </div>
     </>
   );

@@ -41,6 +41,14 @@ export function Sidebar({ saas }: { saas: SaasApp[] }) {
               <span>{s.name}</span>
             </Link>
           ))}
+          <Link
+            href="/new-saas"
+            className="nav-button"
+            style={{ background: pathname === '/new-saas' ? 'var(--surface-hover)' : 'transparent', color: 'var(--text-muted)' }}
+          >
+            <span className="nav-dot" style={{ background: 'transparent', border: '1px dashed var(--text-muted)' }} />
+            <span>+ Ajouter un SaaS</span>
+          </Link>
         </div>
       </div>
 
