@@ -10,6 +10,11 @@ const PERIOD_LABELS: Record<Period, string> = {
 
 const PLAN_OPACITIES = [1, 0.62, 0.34];
 
+/** Avoids NaN/Infinity when the denominator is 0 (e.g. a brand-new SaaS with no baseline yet). */
+function safeRatio(numerator: number, denominator: number): number {
+  return denominator === 0 ? 0 : numerator / denominator;
+}
+
 function bucketAvg(values: number[], n: number) {
   const size = values.length / n;
   const out: number[] = [];
@@ -127,16 +132,16 @@ export function buildDetail(snapshots: Snapshot[], period: Period, accent: strin
 
   const mrrStart = periodSnapshots[0].mrr;
   const mrrEnd = latest.mrr;
-  const mrrDeltaPct = ((mrrEnd - mrrStart) / mrrStart) * 100;
+  const mrrDeltaPct = safeRatio(mrrEnd - mrrStart, mrrStart) * 100;
   const netNew = newSeries.reduce((a, b) => a + b, 0) - churnSeries.reduce((a, b) => a + b, 0);
   const churnSum = churnSeries.reduce((a, b) => a + b, 0);
-  const churnRate = (churnSum / latest.subscribersTotal) * 100;
+  const churnRate = safeRatio(churnSum, latest.subscribersTotal) * 100;
 
   const planDist: PlanDistSegment[] = latest.subscribersByPlan.map((p: Plan, i: number) => ({
     name: p.name,
     price: p.price,
     count: p.count,
-    pct: Math.round((p.count / latest.subscribersTotal) * 100),
+    pct: Math.round(safeRatio(p.count, latest.subscribersTotal) * 100),
     color: withAlpha(accent, PLAN_OPACITIES[i] ?? 0.3),
   }));
 
@@ -168,7 +173,7 @@ export function buildCard(snapshots: Snapshot[]): CardData | null {
   if (snapshots.length === 0) return null;
   const latest = snapshots[snapshots.length - 1];
   const baseline = snapshots[0];
-  const deltaPct = ((latest.mrr - baseline.mrr) / baseline.mrr) * 100;
+  const deltaPct = safeRatio(latest.mrr - baseline.mrr, baseline.mrr) * 100;
   return {
     mrr: latest.mrr,
     subs: latest.subscribersTotal,
