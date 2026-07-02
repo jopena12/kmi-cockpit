@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: oklch(80% 0.005 250); border-radius: 4px; }
+</style>
+</helmet>
+<div style="display:flex;width:100%;height:100vh;font-family:'IBM Plex Sans',sans-serif;background:{{ theme.bg }};color:{{ theme.text }};overflow:hidden;">
+
+  <div style="width:224px;flex-shrink:0;border-right:1px solid {{ theme.border }};background:{{ theme.surface }};display:flex;flex-direction:column;padding:22px 14px;gap:24px;">
+    <div style="display:flex;align-items:baseline;gap:6px;padding:0 8px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:17px;letter-spacing:0.02em;">KMI</span>
+      <span style="font-size:14px;color:{{ theme.textMuted }};">Cockpit</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:2px;">
+      <button onClick="{{ goOverview }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;font-size:13.5px;font-weight:500;background:{{ overviewActiveBg }};" style-hover="background:{{ theme.surfaceHover }};">
+        Vue d'ensemble
+      </button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:{{ theme.textMuted }};padding:0 10px;">Produits</span>
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="3">
+        <button onClick="{{ item.select }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;font-size:13.5px;background:{{ item.activeBg }};" style-hover="background:{{ theme.surfaceHover }};">
+          <span style="width:7px;height:7px;border-radius:50%;background:{{ item.accent }};flex-shrink:0;"></span>
+          <span>{{ item.name }}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:auto;padding:0 8px;font-size:11px;color:{{ theme.textMuted }};line-height:1.5;">
+      Tour de contrôle multi-SaaS
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid {{ theme.border }};flex-shrink:0;gap:16px;">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+        <sc-if value="{{ !isOverview }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ goOverview }}" style="all:unset;cursor:pointer;font-size:15px;color:{{ theme.textMuted }};padding:6px;">←</button>
+        </sc-if>
+        <div style="min-width:0;">
+          <div style="font-size:19px;font-weight:600;">{{ pageTitle }}</div>
+          <div style="font-size:12.5px;color:{{ theme.textMuted }};margin-top:2px;">{{ pageSubtitle }}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;">
+        <div style="display:flex;background:{{ theme.chipBg }};border-radius:8px;padding:3px;gap:2px;">
+          <sc-for list="{{ periodOptions }}" as="opt" hint-placeholder-count="3">
+            <button onClick="{{ opt.select }}" style="all:unset;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:12.5px;font-weight:500;background:{{ opt.bg }};color:{{ opt.color }};box-shadow:{{ opt.shadow }};">{{ opt.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow-y:auto;padding:28px 32px 48px;">
+      <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">
+          <sc-for list="{{ cards }}" as="card" hint-placeholder-count="3">
+            <div data-screen-label="Vue d'ensemble" onClick="{{ card.select }}" style="cursor:pointer;background:{{ theme.surface }};border:1px solid {{ theme.border }};border-left:4px solid {{ card.accent }};border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px;" style-hover="box-shadow:0 4px 14px rgba(0,0,0,0.07);">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:inline-flex;align-items:center;gap:7px;background:{{ card.accentSoft }};color:{{ card.accent }};padding:5px 10px;border-radius:100px;font-size:12.5px;font-weight:600;">
+                  <span style="width:6px;height:6px;border-radius:50%;background:{{ card.accent }};"></span>
+                  {{ card.name }}
+                </div>
+                <span style="color:{{ theme.textMuted }};font-size:15px;">→</span>
+              </div>
+              <div style="font-size:11.5px;color:{{ theme.textMuted }};margin-top:-8px;">{{ card.tagline }}</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;">{{ card.mrrLabel }}</div>
+              <div style="font-size:12.5px;color:{{ theme.textMuted }};margin-top:-8px;">{{ card.subs }} abonnés actifs</div>
+              <div>
+                <sc-if value="{{ card.deltaPositive }}" hint-placeholder-val="{{ true }}">
+                  <span style="color:oklch(55% 0.15 145);font-size:12.5px;font-weight:600;">▲ {{ card.deltaLabel }}</span>
+                </sc-if>
+                <sc-if value="{{ !card.deltaPositive }}" hint-placeholder-val="{{ false }}">
+                  <span style="color:oklch(58% 0.19 25);font-size:12.5px;font-weight:600;">▼ {{ card.deltaLabel }}</span>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ !isOverview }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="{{ selectedSaas.name }}" style="display:flex;flex-direction:column;gap:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="width:11px;height:11px;border-radius:50%;background:{{ selectedSaas.accent }};flex-shrink:0;"></span>
+              <div>
+                <div style="font-size:22px;font-weight:600;">{{ selectedSaas.name }}</div>
+                <div style="font-size:12.5px;color:{{ theme.textMuted }};margin-top:2px;">{{ selectedSaas.tagline }}</div>
+              </div>
+            </div>
+            <div style="display:inline-flex;align-items:center;gap:8px;background:{{ theme.chipBg }};padding:8px 13px;border-radius:8px;font-size:12.5px;">
+              <span style="color:{{ theme.textMuted }};">Formule phare</span>
+              <span style="font-weight:600;">{{ selectedSaas.featured }} · {{ selectedSaas.featuredPrice }} €/mois</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;">
+            <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:10px;padding:16px 18px;">
+              <div style="font-size:11.5px;color:{{ theme.textMuted }};">MRR actuel</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;margin-top:6px;">{{ detail.kpiMrr }}</div>
+              <div style="margin-top:6px;font-size:12px;">
+                <sc-if value="{{ detail.kpiMrrDeltaPositive }}" hint-placeholder-val="{{ true }}"><span style="color:oklch(55% 0.15 145);font-weight:600;">▲ {{ detail.kpiMrrDelta }}</span></sc-if>
+                <sc-if value="{{ !detail.kpiMrrDeltaPositive }}" hint-placeholder-val="{{ false }}"><span style="color:oklch(58% 0.19 25);font-weight:600;">▼ {{ detail.kpiMrrDelta }}</span></sc-if>
+                <span style="color:{{ theme.textMuted }};"> · {{ detail.periodLabel }}</span>
+              </div>
+            </div>
+            <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:10px;padding:16px 18px;">
+              <div style="font-size:11.5px;color:{{ theme.textMuted }};">Abonnés actifs</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;margin-top:6px;">{{ detail.kpiSubs }}</div>
+              <div style="margin-top:6px;font-size:12px;color:{{ theme.textMuted }};">Net {{ detail.kpiNetNew }} sur {{ detail.periodLabel }}</div>
+            </div>
+            <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:10px;padding:16px 18px;">
+              <div style="font-size:11.5px;color:{{ theme.textMuted }};">Taux de churn</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;margin-top:6px;">{{ detail.kpiChurn }}</div>
+              <div style="margin-top:6px;font-size:12px;color:{{ theme.textMuted }};">{{ detail.periodLabel }}</div>
+            </div>
+          </div>
+
+          <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:10px;padding:20px 22px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="font-size:13.5px;font-weight:600;">Évolution du MRR</div>
+              <div style="font-size:11.5px;color:{{ theme.textMuted }};">{{ detail.periodLabel }}</div>
+            </div>
+            <svg viewBox="0 0 680 220" style="width:100%;height:220px;display:block;">
+              <sc-for list="{{ detail.lineChart.yTicks }}" as="tick" hint-placeholder-count="3">
+                <line x1="6" x2="674" y1="{{ tick.lineY }}" y2="{{ tick.lineY }}" stroke="{{ theme.border }}" stroke-width="1"></line>
+                <text x="4" y="{{ tick.y }}" fill="{{ theme.textMuted }}" font-size="10" font-family="IBM Plex Mono, monospace">{{ tick.text }}</text>
+              </sc-for>
+              <sc-if value="{{ areaFillEnabled }}" hint-placeholder-val="{{ true }}">
+                <path d="{{ detail.lineChart.areaD }}" fill="{{ selectedSaas.accentSoft }}" stroke="none"></path>
+              </sc-if>
+              <path d="{{ detail.lineChart.pathD }}" fill="none" stroke="{{ selectedSaas.accent }}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+              <sc-for list="{{ detail.lineChart.points }}" as="pt" hint-placeholder-count="12">
+                <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="2.5" fill="{{ selectedSaas.accent }}"></circle>
+              </sc-for>
+              <sc-for list="{{ detail.lineChart.xLabels }}" as="lbl" hint-placeholder-count="6">
+                <sc-if value="{{ lbl.show }}" hint-placeholder-val="{{ true }}">
+                  <text x="{{ lbl.x }}" y="214" fill="{{ theme.textMuted }}" font-size="10" font-family="IBM Plex Mono, monospace" text-anchor="middle">{{ lbl.text }}</text>
+                </sc-if>
+              </sc-for>
+            </svg>
+          </div>
+
+          <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:10px;padding:20px 22px;max-width:560px;">
+            <div style="font-size:13.5px;font-weight:600;margin-bottom:16px;">Répartition par formule</div>
+            <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;">
+              <sc-for list="{{ detail.planDist }}" as="p" hint-placeholder-count="3">
+                <div style="flex:{{ p.pct }} 0 0%;background:{{ p.color }};"></div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+              <sc-for list="{{ detail.planDist }}" as="p" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="width:8px;height:8px;border-radius:2px;background:{{ p.color }};flex-shrink:0;"></span>
+                    <span>{{ p.name }}</span>
+                    <span style="color:{{ theme.textMuted }};font-size:12px;">{{ p.price }} €/mois</span>
+                  </div>
+                  <div style="font-family:'IBM Plex Mono',monospace;color:{{ theme.textMuted }};font-size:12.5px;">{{ p.count }} · {{ p.pct }}%</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:{{ theme.surface }};border:1px solid {{ theme.border }};border-radius:10px;padding:20px 22px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div style="font-size:13.5px;font-weight:600;">Nouveaux vs résiliations</div>
+              <div style="display:flex;align-items:center;gap:14px;font-size:11.5px;color:{{ theme.textMuted }};">
+                <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:{{ selectedSaas.accent }};"></span>Nouveaux</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:{{ churnColor }};"></span>Résiliations</span>
+              </div>
+            </div>
+            <svg viewBox="0 0 680 170" style="width:100%;height:170px;display:block;">
+              <line x1="6" x2="674" y1="{{ detail.barChart.baseline }}" y2="{{ detail.barChart.baseline }}" stroke="{{ theme.border }}" stroke-width="1"></line>
+              <sc-for list="{{ detail.barChart.bars }}" as="b" hint-placeholder-count="12">
+                <rect x="{{ b.newX }}" y="{{ b.newY }}" width="{{ b.barW }}" height="{{ b.newH }}" fill="{{ selectedSaas.accent }}" rx="1.5"></rect>
+                <rect x="{{ b.churnX }}" y="{{ b.churnY }}" width="{{ b.barW }}" height="{{ b.churnH }}" fill="{{ churnColor }}" rx="1.5"></rect>
+                <sc-if value="{{ b.showLabel }}" hint-placeholder-val="{{ true }}">
+                  <text x="{{ b.labelX }}" y="164" fill="{{ theme.textMuted }}" font-size="10" font-family="IBM Plex Mono, monospace" text-anchor="middle">{{ b.label }}</text>
+                </sc-if>
+              </sc-for>
+            </svg>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 900 },
+  &quot;initialPeriod&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;12m&quot;, &quot;options&quot;: [&quot;7j&quot;, &quot;30j&quot;, &quot;12m&quot;], &quot;tsType&quot;: &quot;string&quot; },
+  &quot;areaFill&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; }
+}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.churnColor = 'oklch(58% 0 0)';
+    this.saas = this.buildAllData();
+    this.state = {
+      period: props.initialPeriod || '12m',
+      selected: null
+    };
+  }
+
+  rngFactory(seed) {
+    let t = seed >>> 0;
+    return function () {
+      t += 0x6D2B79F5;
+      let r = Math.imul(t ^ (t >>> 15), 1 | t);
+      r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  withAlpha(color, alpha) {
+    return color.slice(0, -1) + ' / ' + alpha + ')';
+  }
+
+  buildAllData() {
+    const cfgs = [
+      { id: 'vumos', name: 'Vumos', tagline: 'Assistant IA de préparation de séance', category: 'Accompagnement non-médical',
+        accent: 'oklch(58% 0.19 300)', accentSoft: 'oklch(58% 0.19 300 / 0.12)', seed: 101,
+        plans: [{ name: 'Starter', price: 19, count: 109 }, { name: 'Pro', price: 39, count: 180 }, { name: 'Studio', price: 79, count: 51 }],
+        featured: 'Pro', startMrrFactor: 0.55 },
+      { id: 'ledgerly', name: 'Ledgerly', tagline: 'Facturation & devis pour freelances', category: 'Finance freelance',
+        accent: 'oklch(58% 0.15 200)', accentSoft: 'oklch(58% 0.15 200 / 0.12)', seed: 202,
+        plans: [{ name: 'Solo', price: 15, count: 95 }, { name: 'Team', price: 45, count: 84 }, { name: 'Business', price: 95, count: 31 }],
+        featured: 'Team', startMrrFactor: 0.62 },
+      { id: 'roost', name: 'Roost', tagline: 'Gestion de locations courte durée', category: 'Property management',
+        accent: 'oklch(65% 0.17 55)', accentSoft: 'oklch(65% 0.17 55 / 0.14)', seed: 303,
+        plans: [{ name: 'Starter', price: 29, count: 60 }, { name: 'Growth', price: 69, count: 68 }, { name: 'Scale', price: 149, count: 22 }],
+        featured: 'Growth', startMrrFactor: 0.65 }
+    ];
+    return cfgs.map(c => this.buildSaas(c));
+  }
+
+  buildSaas(c) {
+    const rnd = this.rngFactory(c.seed);
+    const subs = c.plans.reduce((s, p) => s + p.count, 0);
+    const mrr = c.plans.reduce((s, p) => s + p.count * p.price, 0);
+    const startMrr = Math.round(mrr * c.startMrrFactor);
+
+    const monthlyMrr = this.growthSeries(rnd, startMrr, mrr, 12, 0.035);
+    const monthlyNew = this.flowSeries(rnd, Math.round(subs * 0.06), 12, 0.5);
+    const monthlyChurn = this.flowSeries(rnd, Math.max(1, Math.round(subs * 0.015)), 12, 0.5);
+
+    const dailyMrr = this.growthSeries(rnd, Math.round(mrr * 0.93), mrr, 60, 0.01);
+    const dailyNew = this.flowSeries(rnd, Math.max(1, Math.round(subs * 0.012)), 60, 0.6);
+    const dailyChurn = this.flowSeries(rnd, Math.max(1, Math.round(subs * 0.004)), 60, 0.7);
+
+    return { ...c, subs, mrr, monthlyMrr, monthlyNew, monthlyChurn, dailyMrr, dailyNew, dailyChurn };
+  }
+
+  growthSeries(rnd, start, end, n, noiseFactor) {
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      const base = start + (end - start) * t;
+      const noise = base * noiseFactor * (rnd() - 0.5) * 2;
+      arr.push(Math.round(base + noise));
+    }
+    arr[n - 1] = end;
+    return arr;
+  }
+
+  flowSeries(rnd, avg, n, spread) {
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      arr.push(Math.max(0, Math.round(avg * (1 - spread + rnd() * spread * 2))));
+    }
+    return arr;
+  }
+
+  bucketAvg(arr, n) {
+    const size = arr.length / n;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const slice = arr.slice(Math.round(i * size), Math.round((i + 1) * size));
+      out.push(Math.round(slice.reduce((a, b) => a + b, 0) / slice.length));
+    }
+    return out;
+  }
+
+  bucketSum(arr, n) {
+    const size = arr.length / n;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const slice = arr.slice(Math.round(i * size), Math.round((i + 1) * size));
+      out.push(slice.reduce((a, b) => a + b, 0));
+    }
+    return out;
+  }
+
+  dayLabels(totalDays, fmtDate, bucketCount) {
+    const n = bucketCount || totalDays;
+    const size = totalDays / n;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const dayIdx = Math.round((i + 0.5) * size);
+      const d = new Date(2026, 6, 2);
+      d.setDate(d.getDate() - (totalDays - dayIdx));
+      out.push(fmtDate(d));
+    }
+    return out;
+  }
+
+  monthLabels() {
+    const out = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(2026, 6, 2);
+      d.setMonth(d.getMonth() - i);
+      out.push(d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', ''));
+    }
+    return out;
+  }
+
+  buildLineChart(values, labels, fmtCompact) {
+    const width = 680, height = 220, padTop = 18, padBottom = 30, padLeft = 6, padRight = 6;
+    const min = Math.min(...values) * 0.92;
+    const max = Math.max(...values) * 1.08;
+    const range = (max - min) || 1;
+    const n = values.length;
+    const xStep = n > 1 ? (width - padLeft - padRight) / (n - 1) : 0;
+    const yFor = v => padTop + (height - padTop - padBottom) * (1 - (v - min) / range);
+    const points = values.map((v, i) => ({ x: +(padLeft + i * xStep).toFixed(1), y: +yFor(v).toFixed(1) }));
+    const pathD = points.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y).join(' ');
+    const areaD = pathD + ' L ' + points[n - 1].x + ' ' + (height - padBottom) + ' L ' + points[0].x + ' ' + (height - padBottom) + ' Z';
+    const labelStep = Math.max(1, Math.ceil(n / 6));
+    const xLabels = points.map((p, i) => ({ x: p.x, text: labels[i], show: (i % labelStep === 0 || i === n - 1) }));
+    const yTicks = [min, (min + max) / 2, max].map(v => ({ lineY: +yFor(v).toFixed(1), y: +(yFor(v) - 4).toFixed(1), text: fmtCompact(v) }));
+    return { width, height, pathD, areaD, points, xLabels, yTicks };
+  }
+
+  buildBarChart(newSeries, churnSeries, labels) {
+    const width = 680, height = 170, padTop = 10, padBottom = 26, padLeft = 6, padRight = 6;
+    const n = newSeries.length;
+    const groupW = (width - padLeft - padRight) / n;
+    const barW = Math.max(3, groupW * 0.32);
+    const gap = groupW * 0.08;
+    const maxVal = Math.max(...newSeries, ...churnSeries, 1) * 1.15;
+    const usableH = height - padTop - padBottom;
+    const labelStep = Math.max(1, Math.ceil(n / 6));
+    const bars = newSeries.map((nv, i) => {
+      const churnV = churnSeries[i];
+      const groupStart = padLeft + i * groupW;
+      const newH = usableH * (nv / maxVal);
+      const churnH = usableH * (churnV / maxVal);
+      return {
+        newX: +(groupStart + groupW / 2 - barW - gap / 2).toFixed(1),
+        newY: +(height - padBottom - newH).toFixed(1), newH: +newH.toFixed(1),
+        churnX: +(groupStart + groupW / 2 + gap / 2).toFixed(1),
+        churnY: +(height - padBottom - churnH).toFixed(1), churnH: +churnH.toFixed(1),
+        barW: +barW.toFixed(1),
+        label: labels[i],
+        labelX: +(groupStart + groupW / 2).toFixed(1),
+        showLabel: (i % labelStep === 0 || i === n - 1)
+      };
+    });
+    return { width, height, bars, baseline: height - padBottom };
+  }
+
+  buildDetail(s, period, fmtEUR, fmtCompact, fmtDate) {
+    let mrrSeries, newSeries, churnSeries, labels;
+    if (period === '7j') {
+      mrrSeries = s.dailyMrr.slice(-7);
+      newSeries = s.dailyNew.slice(-7);
+      churnSeries = s.dailyChurn.slice(-7);
+      labels = this.dayLabels(7, fmtDate);
+    } else if (period === '30j') {
+      mrrSeries = this.bucketAvg(s.dailyMrr.slice(-30), 6);
+      newSeries = this.bucketSum(s.dailyNew.slice(-30), 6);
+      churnSeries = this.bucketSum(s.dailyChurn.slice(-30), 6);
+      labels = this.dayLabels(30, fmtDate, 6);
+    } else {
+      mrrSeries = s.monthlyMrr;
+      newSeries = s.monthlyNew;
+      churnSeries = s.monthlyChurn;
+      labels = this.monthLabels();
+    }
+
+    const lineChart = this.buildLineChart(mrrSeries, labels, fmtCompact);
+    const barChart = this.buildBarChart(newSeries, churnSeries, labels);
+
+    const mrrStart = mrrSeries[0], mrrEnd = mrrSeries[mrrSeries.length - 1];
+    const mrrDeltaPct = ((mrrEnd - mrrStart) / mrrStart * 100);
+    const netNew = newSeries.reduce((a, b) => a + b, 0) - churnSeries.reduce((a, b) => a + b, 0);
+    const churnSum = churnSeries.reduce((a, b) => a + b, 0);
+    const churnRate = (churnSum / s.subs * 100);
+
+    const opacities = [1, 0.62, 0.34];
+    const planDist = s.plans.map((p, i) => ({
+      name: p.name, price: p.price, count: p.count,
+      pct: Math.round(p.count / s.subs * 100),
+      color: this.withAlpha(s.accent, opacities[i] ?? 0.3)
+    }));
+
+    const periodLabelMap = { '7j': '7 derniers jours', '30j': '30 derniers jours', '12m': '12 derniers mois' };
+
+    return {
+      kpiMrr: fmtEUR(s.mrr),
+      kpiMrrDelta: (mrrDeltaPct >= 0 ? '+' : '') + mrrDeltaPct.toFixed(1) + ' %',
+      kpiMrrDeltaPositive: mrrDeltaPct >= 0,
+      kpiSubs: s.subs,
+      kpiNetNew: (netNew >= 0 ? '+' : '') + netNew,
+      kpiChurn: churnRate.toFixed(1) + ' %',
+      periodLabel: periodLabelMap[period],
+      lineChart, barChart, planDist
+    };
+  }
+
+  renderVals() {
+    const theme = {
+      bg: 'oklch(98% 0.003 250)', surface: 'oklch(100% 0 0)', surfaceHover: 'oklch(95% 0.004 250)',
+      border: 'oklch(89% 0.005 250)', text: 'oklch(20% 0.005 250)', textMuted: 'oklch(46% 0.01 250)',
+      chipBg: 'oklch(94% 0.005 250)'
+    };
+
+    const fmtEUR = n => Math.round(n).toLocaleString('fr-FR') + ' €';
+    const fmtCompact = n => n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '').replace('.', ',') + 'k €' : Math.round(n) + ' €';
+    const fmtDate = d => d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+
+    const cards = this.saas.map(s => {
+      const prev = s.monthlyMrr[10], cur = s.monthlyMrr[11];
+      const deltaPct = ((cur - prev) / prev * 100);
+      return {
+        id: s.id, name: s.name, tagline: s.tagline, accent: s.accent, accentSoft: s.accentSoft,
+        mrrLabel: fmtEUR(s.mrr), subs: s.subs,
+        deltaLabel: (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + ' % vs mois dernier',
+        deltaPositive: deltaPct >= 0,
+        select: () => this.setState({ selected: s.id })
+      };
+    });
+
+    const selectedSaasRaw = this.state.selected ? this.saas.find(s => s.id === this.state.selected) : null;
+    const isOverview = !selectedSaasRaw;
+
+    const selectedSaas = selectedSaasRaw ? {
+      id: selectedSaasRaw.id, name: selectedSaasRaw.name, tagline: selectedSaasRaw.tagline,
+      category: selectedSaasRaw.category, accent: selectedSaasRaw.accent, accentSoft: selectedSaasRaw.accentSoft,
+      featured: selectedSaasRaw.featured,
+      featuredPrice: (selectedSaasRaw.plans.find(p => p.name === selectedSaasRaw.featured) || {}).price
+    } : null;
+
+    const detail = selectedSaasRaw ? this.buildDetail(selectedSaasRaw, this.state.period, fmtEUR, fmtCompact, fmtDate) : null;
+
+    const periodDefs = [{ key: '7j', label: '7 j' }, { key: '30j', label: '30 j' }, { key: '12m', label: '12 mois' }];
+    const periodOptions = periodDefs.map(p => {
+      const active = this.state.period === p.key;
+      return {
+        label: p.label,
+        select: () => this.setState({ period: p.key }),
+        bg: active ? theme.surface : 'transparent',
+        color: active ? theme.text : theme.textMuted,
+        shadow: active ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+      };
+    });
+
+    const navItems = this.saas.map(s => ({
+      id: s.id, name: s.name, accent: s.accent,
+      activeBg: this.state.selected === s.id ? theme.surfaceHover : 'transparent',
+      select: () => this.setState({ selected: s.id })
+    }));
+
+    return {
+      theme,
+      isOverview,
+      cards,
+      selectedSaas,
+      detail,
+      pageTitle: isOverview ? "Vue d'ensemble" : selectedSaas.name,
+      pageSubtitle: isOverview ? `${this.saas.length} produits connectés` : selectedSaas.category,
+      overviewActiveBg: isOverview ? theme.surfaceHover : 'transparent',
+      navItems,
+      periodOptions,
+      churnColor: this.churnColor,
+      areaFillEnabled: this.props.areaFill ?? true,
+      goOverview: () => this.setState({ selected: null })
+    };
+  }
+}
+</script>
+</body>
+</html>
